@@ -1,0 +1,29 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  14
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+// Parametros del difusor bidimensional (Tarea 1, problema 3), compartidos
+// por blockMeshDict, physicalProperties y 0/U mediante:
+//     #include "${FOAM_CASE}/constant/caseSettings"
+//
+// H, LS y RS son los parametros del estudio de sensibilidad al tamano del
+// dominio: H es la altura de entrada, LS el tramo recto aguas arriba (a la
+// izquierda de la rampa) y RS el tramo recto aguas abajo (a la derecha de
+// la rampa). La geometria del difusor (Hout=2H, Ldiff=3H) y Uin se
+// recalculan automaticamente a partir de estos.
+
+H       1;                 // altura de entrada [m]
+LS      10;                // tramo recto aguas arriba, antes de la rampa [m]
+RS      20;                // tramo recto aguas abajo, despues de la rampa [m]
+
+Hout    #calc "2 * $H";      // altura de salida = 2H [m]
+Ldiff   #calc "3 * $H";      // longitud de la rampa del difusor = 3H [m]
+
+Re      100;                  // Reynolds basado en H y la velocidad media de entrada
+nu      1e-05;                // viscosidad cinematica del aire [m2/s]
+Uin     #calc "$Re * $nu / $H"; // velocidad uniforme de entrada [m/s]
+
+// ************************************************************************* //

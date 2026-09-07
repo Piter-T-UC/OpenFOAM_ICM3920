@@ -20,15 +20,15 @@ solvers
     {
         solver          GAMG;
         smoother        GaussSeidel;
-        tolerance       1e-7;
+        tolerance       1e-8;
         relTol          0.01;
     }
 
-    "(U|k|epsilon)"
+    U
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
-        tolerance       1e-8;
+        tolerance       1e-9;
         relTol          0.1;
         nSweeps         1;
     }
@@ -41,9 +41,8 @@ SIMPLE
 
     residualControl
     {
-        p               1e-4;
-        U               1e-4;
-        "(k|epsilon)"   1e-4;
+        p               1e-6;
+        U               1e-6;
     }
 }
 
@@ -52,8 +51,6 @@ relaxationFactors
     equations
     {
         U               0.9;
-        k               0.5;
-        epsilon         0.5;
     }
 }
 

@@ -14,16 +14,19 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Uin = Re*nu/H, definido en constant/caseSettings
+#include "${FOAM_CASE}/constant/caseSettings"
+
 dimensions      [velocity];
 
-internalField   uniform (5 0 0);
+internalField   uniform ($Uin 0 0);
 
 boundaryField
 {
     inlet
     {
         type            fixedValue;
-        value           uniform (5 0 0);
+        value           uniform ($Uin 0 0);
     }
 
     outlet
