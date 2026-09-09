@@ -32,7 +32,7 @@ z1      $zBack;
 
 // Discretizacion: tamano de celda objetivo, escalado con H
 dx      #calc "$H / 20.0";  // tramos rectos
-dxDiff  #calc "$H / 40.0";  // rampa del difusor (malla mas fina)
+dxDiff  #calc "$H / 100.0";  // rampa del difusor (malla mas fina)
 
 nx1     #calc "label(round($LS / $dx))";       // celdas tramo recto de entrada (izquierdo)
 nx2     #calc "label(round($Ldiff / $dxDiff))"; // celdas rampa del difusor

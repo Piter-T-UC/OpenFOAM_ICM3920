@@ -13,11 +13,12 @@ FoamFile
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// dimensions [masa longitud tiempo temperatura mol corriente intensidad_luminosa];
 // Uin = Re*nu/H, definido en constant/caseSettings
 #include "${FOAM_CASE}/constant/caseSettings"
 
-dimensions      [velocity];
+dimensions      [0 1 -1 0 0 0 0];
 
 internalField   uniform ($Uin 0 0);
 

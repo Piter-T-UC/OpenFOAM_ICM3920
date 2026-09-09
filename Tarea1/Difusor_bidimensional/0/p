@@ -13,8 +13,8 @@ FoamFile
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-dimensions      [kinematicPressure];
+// dimensions [masa longitud tiempo temperatura mol corriente intensidad_luminosa];
+dimensions      [0 2 -2 0 0 0 0];
 
 internalField   uniform 0;
 
