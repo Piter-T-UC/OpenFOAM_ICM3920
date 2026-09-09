@@ -6,3 +6,4 @@ log.*
 *.foam
 constant/polyMesh/*
 !constant/polyMesh/blockMeshDict
+dynamicCode/

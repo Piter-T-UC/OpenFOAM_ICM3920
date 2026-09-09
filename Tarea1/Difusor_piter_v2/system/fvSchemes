@@ -9,37 +9,42 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      epsilon;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
-
-internalField   uniform 20;
-
-boundaryField
+ddtSchemes
 {
-  frontAndBack
-    {
-      type	empty;
-    }
-  outlet
-    {
-      type	zeroGradient;
-    }
-  inlet
-    {
-      type	turbulentMixingLengthDissipationRateInlet;
-      value	uniform 1.0;
-      mixingLength	0.001;
-    }
-  "(lowerWall|upperWall)"
-    {
-      type	epsilonWallFunction;
-      value     uniform 1.0;
-    }
+    default         steadyState;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+}
+
+divSchemes
+{
+    default         none;
+    div(phi,U)      bounded Gauss limitedLinearV 1;
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
 }
 
 

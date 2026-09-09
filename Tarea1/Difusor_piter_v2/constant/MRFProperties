@@ -1,0 +1,8 @@
+FoamFile
+{
+	class	dictionary;
+	format	ascii;
+	location	"constant";
+	object	MRFProperties;
+	version	2.0;
+}

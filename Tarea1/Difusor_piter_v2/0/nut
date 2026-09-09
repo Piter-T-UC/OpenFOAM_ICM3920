@@ -9,7 +9,7 @@ FoamFile
 
 
 dimensions	[0 2 -1 0 0 0 0];
-internalField	uniform 0.10999999940395355;
+internalField	uniform 0;
 boundaryField
 {
 	frontAndBack
@@ -19,16 +19,16 @@ boundaryField
 	outlet
 	{
 		type	calculated;
-		value	uniform 0.10999999940395355;
+		value	uniform 0;
 	}
 	inlet
 	{
 		type	calculated;
-		value	uniform 0.10999999940395355;
+		value	uniform 0;
 	}
 	"(lowerWall|upperWall)"
 	{
-		type	nutUWallFunction;
-		value	uniform 0.10999999940395355;
+		type	calculated;
+		value	uniform 0;
 	}
 }
