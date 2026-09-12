@@ -1,0 +1,71 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  14
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      sampleDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Lineas de muestreo de U y p justo antes y justo despues de la rampa del
+// difusor (rampaAntes/rampaDespues), mas una linea longitudinal cerca de la
+// pared superior (presionCanal) para ver la evolucion de p a lo largo de
+// todo el canal. La pared superior es plana en todo el dominio (yTop =
+// Hout, constante en los 3 bloques de blockMeshDict), por eso sirve como
+// linea de muestreo unica de x0 a xFinal sin importar LS/RS.
+
+#include "${FOAM_CASE}/constant/Parametros"
+
+distRampa      0.2;   // separacion respecto al inicio/fin de la rampa [m]
+
+xRampaAntes    #calc "$LS - $distRampa";
+xRampaDespues  #calc "$LS + $Ldiff + $distRampa";
+
+xFinal         #calc "$LS + $Ldiff + $RS";
+
+zMid           #calc "0.05 * $H";
+y0In           #calc "$Hout - $H";
+yTop           $Hout;
+yParedSup      #calc "$Hout - 0.01 * $H";  // un poco por debajo de la pared superior
+
+type            sets;
+libs            ("libsampling.so");
+interpolationScheme cellPoint;
+setFormat       raw;
+
+sets
+(
+    rampaAntes
+    {
+        type    lineUniform;
+        axis    y;
+        start   ($xRampaAntes $y0In $zMid);
+        end     ($xRampaAntes $yTop $zMid);
+        nPoints 200;
+    }
+    rampaDespues
+    {
+        type    lineUniform;
+        axis    y;
+        start   ($xRampaDespues 0    $zMid);
+        end     ($xRampaDespues $yTop $zMid);
+        nPoints 200;
+    }
+    presionCanal
+    {
+        type    lineUniform;
+        axis    x;
+        start   (0       $yParedSup $zMid);
+        end     ($xFinal $yParedSup $zMid);
+        nPoints 400;
+    }
+);
+
+fields (U p);
+
+// ************************************************************************* //

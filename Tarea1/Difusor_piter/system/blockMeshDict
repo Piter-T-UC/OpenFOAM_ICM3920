@@ -31,13 +31,13 @@ z0      0;
 z1      $zBack;
 
 // Discretizacion: tamano de celda objetivo, escalado con H
-dx      #calc "$H / 10.0";  // tramos rectos
-dxDiff  #calc "$H / 20.0";  // rampa del difusor (malla mas fina)
+dx      #calc "$H / 20.0";  // tramos rectos
+dxDiff  #calc "$H / 50.0";  // rampa del difusor (malla mas fina)
 
 nx1     #calc "label(round($LS / $dx))";       // celdas tramo recto de entrada (izquierdo)
 nx2     #calc "label(round($Ldiff / $dxDiff))"; // celdas rampa del difusor
 nx3     #calc "label(round($RS / $dx))";       // celdas tramo recto de salida (derecho)
-ny      60;     // celdas en altura (comun a los 3 bloques)
+ny      120;     // celdas en altura (comun a los 3 bloques)
 nz      1;      // celdas en z (caso 2D)
 
 // Refinamiento hacia ambas paredes (superior e inferior)

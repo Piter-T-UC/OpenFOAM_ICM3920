@@ -1,0 +1,21 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  14
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+//     #include "${FOAM_CASE}/constant/caseSettings"
+
+H       1;                 // altura de entrada [m]
+LS      2;                // tramo recto aguas arriba, antes de la rampa [m]
+RS      8;                // tramo recto aguas abajo, despues de la rampa [m]
+
+Hout    #calc "2 * $H";      // altura de salida = 2H [m]
+Ldiff   #calc "3 * $H";      // longitud de la rampa del difusor = 3H [m]
+
+Re      100;                  // Reynolds basado en H y la velocidad media de entrada
+nu      1.8440831253e-05;                // viscosidad cinematica del aire [m2/s]
+Uin     #calc "$Re * $nu / $H"; // velocidad uniforme de entrada [m/s]
+
+// ************************************************************************* //

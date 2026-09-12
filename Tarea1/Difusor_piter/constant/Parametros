@@ -5,11 +5,11 @@
     \\  /    A nd           | Version:  14
      \\/     M anipulation  |
 \*---------------------------------------------------------------------------*/
-//     #include "${FOAM_CASE}/constant/caseSettings"
+//     #include "${FOAM_CASE}/constant/Parametros"
 
 H       1;                 // altura de entrada [m]
 LS      10;                // tramo recto aguas arriba, antes de la rampa [m]
-RS      10;                // tramo recto aguas abajo, despues de la rampa [m]
+RS      20;                // tramo recto aguas abajo, despues de la rampa [m]
 
 Hout    #calc "2 * $H";      // altura de salida = 2H [m]
 Ldiff   #calc "3 * $H";      // longitud de la rampa del difusor = 3H [m]

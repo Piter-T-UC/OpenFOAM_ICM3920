@@ -1,0 +1,62 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  14
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      sampleDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Lineas de muestreo de U en la seccion de entrada y de salida, para
+// comparar contra la solucion analitica de Poiseuille plano.
+//
+// Posiciones (parametrizadas con distOffset, en metros):
+//   - aguas arriba: distOffset despues del comienzo del dominio (x0 = 0)
+//   - aguas abajo : distOffset antes del final del dominio (x3 = LS+Ldiff+RS)
+
+#include "${FOAM_CASE}/constant/Parametros"
+
+distOffset  1;                                          // separacion desde cada extremo [m]
+
+xInlet      #calc "0 + $distOffset";                     // seccion de entrada (tramo recto izq.)
+xOutlet     #calc "$LS + $Ldiff + $RS - $distOffset";     // seccion de salida (tramo recto der.)
+
+zMid        #calc "0.05 * $H";   // plano medio en z (zBack = 0.1*H en blockMeshDict)
+
+y0In        #calc "$Hout - $H";  // pared inferior en el tramo de entrada (= H)
+y0Out       0;                   // pared inferior en el tramo de salida
+yTop        $Hout;               // pared superior, constante en todo el dominio
+
+type            sets;
+libs            ("libsampling.so");
+interpolationScheme cellPoint;
+setFormat       raw;
+
+sets
+(
+    inletProfile
+    {
+        type    lineUniform;
+        axis    y;
+        start   ($xInlet $y0In $zMid);
+        end     ($xInlet $yTop $zMid);
+        nPoints 200;
+    }
+    outletProfile
+    {
+        type    lineUniform;
+        axis    y;
+        start   ($xOutlet $y0Out $zMid);
+        end     ($xOutlet $yTop  $zMid);
+        nPoints 200;
+    }
+);
+
+fields (U);
+
+// ************************************************************************* //

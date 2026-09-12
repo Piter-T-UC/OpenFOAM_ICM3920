@@ -1,0 +1,28 @@
+ 
+    type            sets;
+    libs            (sampling);
+    interpolationScheme cellPoint;
+    setFormat       raw;
+ 
+    sets
+    (
+        inletProfile
+        {
+            type    uniform;
+            axis    y;
+            start   (X_ENTRADA 0 0.005);   // x fijo, aguas arriba de la rampa
+            end     (X_ENTRADA H 0.005);   // H = altura real del canal de entrada [m]
+            nPoints 200;
+        }
+        outletProfile
+        {
+            type    uniform;
+            axis    y;
+            start   (X_SALIDA 0 0.005);    // x fijo, aguas abajo de la rampa
+            end     (X_SALIDA TWOH 0.005); // TWOH = 2*H [m]
+            nPoints 200;
+        }
+    );
+ 
+    fields (U);
+ 

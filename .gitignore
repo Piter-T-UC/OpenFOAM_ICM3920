@@ -4,6 +4,9 @@ processor*
 postProcessing/
 log.*
 *.foam
-constant/polyMesh/*
-!constant/polyMesh/blockMeshDict
+**/constant/polyMesh/*
+!**/constant/polyMesh/blockMeshDict
+!**/constant/polyMesh/boundary
 dynamicCode/
+__pycache__/
+*.pyc
