@@ -1,0 +1,257 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  14
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Canal recto con un cilindro centrado en altura (Tarea 2).
+// Todos los parametros estan en constant/Parametros.
+
+#include "${FOAM_CASE}/constant/Parametros"
+
+// Topologia (plano z = z0, se repite en z = z1 sumando 20 al indice):
+//
+//   12-----------13-----------14-------------------15   y3 = H
+//    |            |            |                    |
+//    |    b6      |    b7      |        b8          |
+//    |            |            |                    |
+//    8-----------9------------10-------------------11   y2 = yc + B
+//    |            | \  top   / |                    |
+//    |            |  19----18  |                    |
+//    |    b3      |l |  (o) | r|        b5          |
+//    |            |  16----17  |                    |
+//    |            | /  bot   \ |                    |
+//    4------------5------------6--------------------7   y1 = yc - B
+//    |            |            |                    |
+//    |    b0      |    b1      |        b2          |
+//    |            |            |                    |
+//    0------------1------------2--------------------3   y0 = 0
+//   x0 = 0     x1 = xc-B    x2 = xc+B            x3 = L
+//
+// 16..19: puntos del cilindro a 45 grados; entre el cilindro y el cuadrado
+// (5-6-10-9) hay una O-grid de 4 bloques (bot, r, top, l).
+
+z0      0;
+z1      $zBack;
+
+x0      0;
+x1      #calc "$xc - $B";
+x2      #calc "$xc + $B";
+x3      $L;
+
+y0      0;
+y1      #calc "$yc - $B";
+y2      #calc "$yc + $B";
+y3      $H;
+
+// Puntos del cilindro a 45 grados
+c45     #calc "$R * sqrt(0.5)";
+xcm     #calc "$xc - $c45";
+xcp     #calc "$xc + $c45";
+ycm     #calc "$yc - $c45";
+ycp     #calc "$yc + $c45";
+
+// Puntos medios de los arcos del cilindro
+xArcL   #calc "$xc - $R";
+xArcR   #calc "$xc + $R";
+yArcB   #calc "$yc - $R";
+yArcT   #calc "$yc + $R";
+
+// Discretizacion
+nxUp    #calc "label(round(($Lup - $B) / $dx))";        // bloques aguas arriba
+nxDown  #calc "label(round(($Ldown - $B) / $dx))";      // bloques aguas abajo
+nyBand  #calc "label(round((0.5 * $H - $B) / $dx))";    // bandas superior e inferior
+nz      1;                                              // caso 2D
+
+// En la O-grid la direccion local 2 va del cuadrado hacia el cilindro,
+// por eso se usa el inverso de gradRad (celdas finas en la pared del cilindro).
+invGradRad  #calc "1.0 / $gradRad";
+
+vertices
+(
+    ($x0 $y0 $z0)    // 0
+    ($x1 $y0 $z0)    // 1
+    ($x2 $y0 $z0)    // 2
+    ($x3 $y0 $z0)    // 3
+    ($x0 $y1 $z0)    // 4
+    ($x1 $y1 $z0)    // 5
+    ($x2 $y1 $z0)    // 6
+    ($x3 $y1 $z0)    // 7
+    ($x0 $y2 $z0)    // 8
+    ($x1 $y2 $z0)    // 9
+    ($x2 $y2 $z0)    // 10
+    ($x3 $y2 $z0)    // 11
+    ($x0 $y3 $z0)    // 12
+    ($x1 $y3 $z0)    // 13
+    ($x2 $y3 $z0)    // 14
+    ($x3 $y3 $z0)    // 15
+    ($xcm $ycm $z0)  // 16  cilindro, abajo-izquierda
+    ($xcp $ycm $z0)  // 17  cilindro, abajo-derecha
+    ($xcp $ycp $z0)  // 18  cilindro, arriba-derecha
+    ($xcm $ycp $z0)  // 19  cilindro, arriba-izquierda
+
+    ($x0 $y0 $z1)    // 20
+    ($x1 $y0 $z1)    // 21
+    ($x2 $y0 $z1)    // 22
+    ($x3 $y0 $z1)    // 23
+    ($x0 $y1 $z1)    // 24
+    ($x1 $y1 $z1)    // 25
+    ($x2 $y1 $z1)    // 26
+    ($x3 $y1 $z1)    // 27
+    ($x0 $y2 $z1)    // 28
+    ($x1 $y2 $z1)    // 29
+    ($x2 $y2 $z1)    // 30
+    ($x3 $y2 $z1)    // 31
+    ($x0 $y3 $z1)    // 32
+    ($x1 $y3 $z1)    // 33
+    ($x2 $y3 $z1)    // 34
+    ($x3 $y3 $z1)    // 35
+    ($xcm $ycm $z1)  // 36
+    ($xcp $ycm $z1)  // 37
+    ($xcp $ycp $z1)  // 38
+    ($xcm $ycp $z1)  // 39
+);
+
+blocks
+(
+    // Fila inferior
+    hex (0 1 5 4 20 21 25 24)     ($nxUp   $nyBand $nz) simpleGrading (1 1 1)  // b0
+    hex (1 2 6 5 21 22 26 25)     ($nTheta $nyBand $nz) simpleGrading (1 1 1)  // b1
+    hex (2 3 7 6 22 23 27 26)     ($nxDown $nyBand $nz) simpleGrading (1 1 1)  // b2
+
+    // Fila central (aguas arriba y aguas abajo del cuadrado)
+    hex (4 5 9 8 24 25 29 28)     ($nxUp   $nTheta $nz) simpleGrading (1 1 1)  // b3
+    hex (6 7 11 10 26 27 31 30)   ($nxDown $nTheta $nz) simpleGrading (1 1 1)  // b5
+
+    // Fila superior
+    hex (8 9 13 12 28 29 33 32)   ($nxUp   $nyBand $nz) simpleGrading (1 1 1)  // b6
+    hex (9 10 14 13 29 30 34 33)  ($nTheta $nyBand $nz) simpleGrading (1 1 1)  // b7
+    hex (10 11 15 14 30 31 35 34) ($nxDown $nyBand $nz) simpleGrading (1 1 1)  // b8
+
+    // O-grid alrededor del cilindro: (tangencial, radial, z)
+    hex (5 6 17 16 25 26 37 36)   ($nTheta $nRad $nz) simpleGrading (1 $invGradRad 1)  // bot
+    hex (6 10 18 17 26 30 38 37)  ($nTheta $nRad $nz) simpleGrading (1 $invGradRad 1)  // r
+    hex (10 9 19 18 30 29 39 38)  ($nTheta $nRad $nz) simpleGrading (1 $invGradRad 1)  // top
+    hex (9 5 16 19 29 25 36 39)   ($nTheta $nRad $nz) simpleGrading (1 $invGradRad 1)  // l
+);
+
+edges
+(
+    arc 16 17 ($xc $yArcB $z0)
+    arc 17 18 ($xArcR $yc $z0)
+    arc 18 19 ($xc $yArcT $z0)
+    arc 19 16 ($xArcL $yc $z0)
+
+    arc 36 37 ($xc $yArcB $z1)
+    arc 37 38 ($xArcR $yc $z1)
+    arc 38 39 ($xc $yArcT $z1)
+    arc 39 36 ($xArcL $yc $z1)
+);
+
+boundary
+(
+    inlet
+    {
+        type    patch;
+        faces
+        (
+            (0 20 24 4)
+            (4 24 28 8)
+            (8 28 32 12)
+        );
+    }
+
+    outlet
+    {
+        type    patch;
+        faces
+        (
+            (3 7 27 23)
+            (7 11 31 27)
+            (11 15 35 31)
+        );
+    }
+
+    lowerWall
+    {
+        type    wall;
+        faces
+        (
+            (0 1 21 20)
+            (1 2 22 21)
+            (2 3 23 22)
+        );
+    }
+
+    upperWall
+    {
+        type    wall;
+        faces
+        (
+            (12 32 33 13)
+            (13 33 34 14)
+            (14 34 35 15)
+        );
+    }
+
+    cylinder
+    {
+        type    wall;
+        faces
+        (
+            (16 36 37 17)
+            (17 37 38 18)
+            (18 38 39 19)
+            (19 39 36 16)
+        );
+    }
+
+    frontAndBack
+    {
+        type    empty;
+        faces
+        (
+            // z = z0
+            (0 4 5 1)
+            (1 5 6 2)
+            (2 6 7 3)
+            (4 8 9 5)
+            (6 10 11 7)
+            (8 12 13 9)
+            (9 13 14 10)
+            (10 14 15 11)
+            (5 16 17 6)
+            (6 17 18 10)
+            (10 18 19 9)
+            (9 19 16 5)
+
+            // z = z1
+            (20 21 25 24)
+            (21 22 26 25)
+            (22 23 27 26)
+            (24 25 29 28)
+            (26 27 31 30)
+            (28 29 33 32)
+            (29 30 34 33)
+            (30 31 35 34)
+            (25 26 37 36)
+            (26 30 38 37)
+            (30 29 39 38)
+            (29 25 36 39)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

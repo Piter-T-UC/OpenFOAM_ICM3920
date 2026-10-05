@@ -1,0 +1,97 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  14
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "${FOAM_CASE}/constant/Parametros"
+
+tc              #calc "$D / $Uin";      // tiempo convectivo D/Uin [s]
+xProbe          #calc "$xc + 2.0 * $D"; // sonda 2D aguas abajo del centro
+zMid            #calc "0.5 * $zBack";
+
+application     foamRun;
+
+solver          incompressibleFluid;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         #calc "$nTc * $tc";
+
+deltaT          #calc "0.001 * $tc";    // paso inicial; luego lo ajusta maxCo
+
+adjustTimeStep  yes;
+
+maxCo           0.5;
+
+writeControl    adjustableRunTime;
+
+writeInterval   $tc;                     // escribe cada tiempo convectivo
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   8;
+
+runTimeModifiable true;
+
+functions
+{
+    // Coeficientes de arrastre y sustentacion: postProcessing/forceCoeffs
+    // Con Cl(t) se obtiene la frecuencia de desprendimiento -> St = f D / Uin
+    forceCoeffs
+    {
+        type            forceCoeffs;
+        libs            ("libforces.so");
+        writeControl    timeStep;
+        writeInterval   1;
+
+        patches         (cylinder);
+        rho             rhoInf;
+        rhoInf          1;
+        magUInf         $Uin;
+        lRef            $D;
+        Aref            #calc "$D * $zBack";
+        CofR            ($xc $yc 0);
+        dragDir         (1 0 0);
+        liftDir         (0 1 0);
+        pitchAxis       (0 0 1);
+    }
+
+    // Sonda en la estela, 2D aguas abajo del centro del cilindro
+    probes
+    {
+        type            probes;
+        libs            ("libsampling.so");
+        writeControl    timeStep;
+        writeInterval   1;
+
+        fields          (U p);
+        probeLocations
+        (
+            ($xProbe $yc $zMid)
+        );
+    }
+}
+
+// ************************************************************************* //
