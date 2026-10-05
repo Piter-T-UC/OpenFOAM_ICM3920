@@ -18,6 +18,7 @@ FoamFile
 tc              #calc "$D / $Uin";      // tiempo convectivo D/Uin [s]
 xProbe          #calc "$xc + 2.0 * $D"; // sonda 2D aguas abajo del centro
 zMid            #calc "0.5 * $zBack";
+zMidNeg         #calc "-0.5 * $zBack";
 
 application     foamRun;
 
@@ -78,7 +79,9 @@ functions
         pitchAxis       (0 0 1);
     }
 
-    // Sonda en la estela, 2D aguas abajo del centro del cilindro
+    // Sonda en la estela, 2D aguas abajo del centro del cilindro.
+    // extrudeMesh puede dejar la malla en z > 0 o en z < 0, por eso hay dos
+    // puntos: OpenFOAM avisa "Did not find location" y omite el que quede fuera.
     probes
     {
         type            probes;
@@ -90,6 +93,7 @@ functions
         probeLocations
         (
             ($xProbe $yc $zMid)
+            ($xProbe $yc $zMidNeg)
         );
     }
 }

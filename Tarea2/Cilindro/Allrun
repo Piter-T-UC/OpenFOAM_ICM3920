@@ -2,5 +2,7 @@
 cd "${0%/*}" || exit 1
 set -e
 blockMesh > log.blockMesh 2>&1
+snappyHexMesh -overwrite > log.snappyHexMesh 2>&1
+extrudeMesh > log.extrudeMesh 2>&1
 checkMesh > log.checkMesh 2>&1
 foamRun > log.foamRun 2>&1

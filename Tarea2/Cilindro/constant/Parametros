@@ -7,15 +7,15 @@
 \*---------------------------------------------------------------------------*/
 // Flujo alrededor de un cilindro dentro de un canal recto (Tarea 2).
 // Este es el UNICO archivo que hay que editar: lo leen blockMeshDict,
-// controlDict, physicalProperties, 0/U y 0/p.
+// snappyHexMeshDict, extrudeMeshDict, controlDict, physicalProperties y 0/U.
 //
 //      y
 //      ^   upperWall
 //    H +--------------------------------------------------+
-//      |            |<-B->|                               |
-// inlet|            +-----+                               |outlet
-//  --> |            | (o) | yc = H/2                      |
-//      |            +-----+                               |
+//      |                                                  |
+// inlet|                                                  |outlet
+//  --> |             (o)  yc = H/2                        |
+//      |                                                  |
 //      |                                                  |
 //    0 +--------------------------------------------------+--> x
 //      0   lowerWall  xc = Lup                     Lup + Ldown
@@ -35,7 +35,6 @@ xc      $Lup;                   // centro del cilindro en x
 yc      #calc "0.5 * $H";       // centro del cilindro en y (mitad de la altura)
 L       #calc "$Lup + $Ldown";  // largo total del canal
 
-zBack   #calc "0.1 * $D";       // espesor en z (caso 2D)
 
 // ---------------------------------------------------------------------------
 // Flujo
@@ -47,34 +46,39 @@ Uin     #calc "$Re * $nu / $D";         // velocidad uniforme de entrada [m/s]
 nTc     200;                            // duracion de la simulacion en tiempos convectivos D/Uin
 
 // ---------------------------------------------------------------------------
-// Malla
+// Malla (blockMesh de fondo + snappyHexMesh + extrudeMesh)
 // ---------------------------------------------------------------------------
-// Alrededor del cilindro hay una O-grid de 4 bloques que ocupa un cuadrado
-// de semilado B centrado en (xc, yc). Debe cumplirse:  R < B < H/2  y  B < Lup.
-B       #calc "1.0 * $D";
+// Malla de fondo: celdas cubicas de lado dx (snappy refina dividiendo cada
+// celda en 8, por eso el espesor en z es igual a dx).
+dx      #calc "$D / 10.0";
+zBack   $dx;                    // espesor en z (caso 2D)
 
-nTheta  40;     // celdas en cada cuarto de circunferencia (= celdas en cada lado del cuadrado)
+// Zona de refinamiento en la estela (caja). Tamano de celda = dx / 2^wakeLevel
+wakeXmin    #calc "$xc - 1.5 * $D";
+wakeXmax    #calc "$xc + 8.0 * $D";
+wakeYmin    #calc "$yc - 1.5 * $D";
+wakeYmax    #calc "$yc + 1.5 * $D";
+wakeLevel   2;
 
 // ===================== REFINAMIENTO EN LA PARED DEL CILINDRO ================
 // ========================= ESTO LO CALCULAS TU ==============================
-// nRad    : numero de celdas en direccion radial, entre el cilindro y el cuadrado
-// gradRad : razon (tamano ultima celda, junto al cuadrado) / (tamano primera celda,
-//           junto al cilindro). gradRad > 1 => celdas finas en la pared del cilindro.
+// cylLevelMin/Max : nivel de refinamiento de snappy en la superficie del cilindro.
+//                   Tamano de celda junto al cilindro: dn = dx / 2^nivel
+// nLayers         : numero de capas prismaticas pegadas a la pared (addLayers)
+// expansionRatio  : razon de crecimiento entre capas consecutivas (er)
+// firstLayerThickness : espesor de la primera capa t1 [m] (relativeSizes false)
 //
-// Formulas utiles (largo radial Lr = B - R en 0, 90, 180, 270 grados;
-//                                  Lr = B*sqrt(2) - R en las diagonales):
-//     razon entre celdas consecutivas : r  = gradRad^(1/(nRad-1))
-//     primera celda (en la pared)     : d1 = Lr * (r - 1) / (r^nRad - 1)
-//     ultima celda (en el cuadrado)   : dN = d1 * gradRad
+// Formulas utiles:
+//     espesor total de las capas : T  = t1 * (er^nLayers - 1) / (er - 1)
+//     espesor de la ultima capa  : tN = t1 * er^(nLayers - 1)
+//     conviene que tN sea parecido a dn para que la transicion sea suave.
 //
 // Los valores de abajo son SOLO un placeholder para que la malla se genere.
-nRad    40;     // <-- TU CALCULAS
-gradRad 20;     // <-- TU CALCULAS
+cylLevelMin         3;                      // <-- TU CALCULAS
+cylLevelMax         3;                      // <-- TU CALCULAS
+nLayers             10;                     // <-- TU CALCULAS
+expansionRatio      1.2;                    // <-- TU CALCULAS
+firstLayerThickness #calc "0.0025 * $D";    // <-- TU CALCULAS
 // ============================================================================
-
-// Tamano de celda lejos del cilindro (bloques aguas arriba, aguas abajo y bandas
-// superior/inferior). Conviene que sea parecido a 2B/nTheta para que no haya
-// saltos de tamano en el borde del cuadrado.
-dx      #calc "$D / 20.0";
 
 // ************************************************************************* //

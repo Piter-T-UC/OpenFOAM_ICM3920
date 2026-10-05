@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  14
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    object      extrudeMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// snappyHexMesh refina tambien en z, asi que la malla queda con varias celdas
+// en z cerca del cilindro. Aqui se toma la cara "front" de esa malla y se
+// extruye una sola celda: el resultado es una malla 2D con front/back = empty.
+
+#include "${FOAM_CASE}/constant/Parametros"
+
+constructFrom       patch;
+sourceCase          "$FOAM_CASE";
+sourcePatches       (front);
+exposedPatchName    back;
+
+flipNormals         false;
+
+extrudeModel        plane;     // 1 capa y patches front/back de tipo empty
+nLayers             1;
+expansionRatio      1;
+
+planeCoeffs
+{
+    thickness       $zBack;
+}
+
+linearNormalCoeffs
+{
+    thickness       $zBack;
+}
+
+mergeFaces          false;
+mergeTol            0;
+
+// ************************************************************************* //

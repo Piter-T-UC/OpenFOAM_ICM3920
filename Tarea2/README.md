@@ -13,23 +13,25 @@ Todo se controla desde `Cilindro/constant/Parametros`:
 | `H` | altura del canal | `4D` |
 | `Re` | Reynolds basado en `D` y `Uin` (`Uin = Re·nu/D`) | `100` |
 | `nTc` | duración en tiempos convectivos `D/Uin` | `200` |
-| `B` | semilado del cuadrado de la O-grid alrededor del cilindro | `1D` |
-| `nTheta` | celdas por cuarto de circunferencia | `40` |
-| `nRad`, `gradRad` | **refinamiento radial en la pared del cilindro (lo calculas tú)** | placeholder `40`, `20` |
-| `dx` | tamaño de celda lejos del cilindro | `D/20` |
+| `dx` | tamaño de celda de la malla de fondo (y espesor en z) | `D/10` |
+| `wake*`, `wakeLevel` | caja de refinamiento en la estela y su nivel | `xc-1.5D … xc+8D`, `yc±1.5D`, nivel `2` |
+| `cylLevelMin/Max` | **nivel de refinamiento en la superficie del cilindro (lo calculas tú)** | placeholder `3` |
+| `nLayers`, `expansionRatio`, `firstLayerThickness` | **capas en la pared del cilindro (lo calculas tú)** | placeholder `10`, `1.2`, `0.0025D` |
 
-Restricciones: `R < B < H/2` y `B < Lup`.
+## Malla (snappyHexMesh)
+1. `blockMesh`: malla de fondo, el canal completo con celdas cúbicas de lado `dx` y 1 celda en z.
+2. `snappyHexMesh`: recorta el cilindro, refina hasta el nivel `cylLevel` en su superficie
+   (celda `dx/2^nivel`) y `wakeLevel` en la estela, y agrega `nLayers` capas en la pared.
+3. `extrudeMesh`: snappy refina también en z, así que se toma la cara `front` y se extruye
+   una sola celda para volver a una malla 2D (`front`/`back` de tipo `empty`).
 
-## Malla
-12 bloques: una O-grid de 4 bloques entre el cilindro y el cuadrado de semilado `B`,
-más 8 bloques rectangulares que completan el canal (ver el esquema en `system/blockMeshDict`).
-En la O-grid la dirección radial se gradúa con `gradRad` (celdas finas junto al cilindro).
+Revisa en `log.snappyHexMesh` qué porcentaje de la pared quedó con capas.
 
 ## Correr
 ```bash
 source /opt/openfoam14/etc/bashrc
 cd Tarea2/Cilindro
-./Allrun        # blockMesh, checkMesh, foamRun
+./Allrun        # blockMesh, snappyHexMesh, extrudeMesh, checkMesh, foamRun
 ./Allclean      # limpiar
 ```
 
